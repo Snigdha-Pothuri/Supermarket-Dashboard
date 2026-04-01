@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+    <h2>Supermarket Dashboard</h2>
+
+    <!-- KPI CARDS -->
+    <div>
+        <p><b>Total Sales:</b> ₹{{ total_sales }}</p>
+        <p><b>Total Items Sold:</b> {{ total_items }}</p>
+    </div>
+
+    <!-- LOW STOCK -->
+    <h3>Low Stock Products</h3>
+    {% if low_stock %}
+        <ul>
+            {% for item in low_stock %}
+                <li>{{ item.product_name }} ({{ item.stock_left }} left)</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No low stock items</p>
+    {% endif %}
+
+    <!-- CHARTS -->
+    <h3>Sales by Category</h3>
+    <canvas id="categoryChart" width="400" height="200"></canvas>
+
+    <h3>Daily Sales Trend</h3>
+    <canvas id="dailyChart" width="400" height="200"></canvas>
+
+    <!-- TABLE -->
+    <h3>All Data</h3>
+    <table border="1">
+        <tr>
+            <th>Date</th>
+            <th>Product</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Qty</th>
+            <th>Stock</th>
+        </tr>
+
+        {% for row in data %}
+        <tr>
+            <td>{{ row.date }}</td>
+            <td>{{ row.product_name }}</td>
+            <td>{{ row.category }}</td>
+            <td>{{ row.price }}</td>
+            <td>{{ row.quantity_sold }}</td>
+            <td>{{ row.stock_left }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <br>
+    <a href="/home">Add More Data</a> |
+    <a href="/logout">Logout</a>
+
+    <!-- CHART.JS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+    // CATEGORY DATA
+    const categoryData = JSON.parse('{{ category_sales | tojson | safe }}');
+    const labels1 = Object.keys(categoryData);
+    const values1 = Object.values(categoryData);
+
+    new Chart(document.getElementById("categoryChart"), {
+        type: "bar",
+        data: {
+            labels: labels1,
+            datasets: [{
+                label: "Items Sold",
+                data: values1
+            }]
+        }
+    });
+
+    // DAILY DATA
+    const dailyData = JSON.parse('{{ daily_sales | tojson | safe }}');
+    const labels2 = Object.keys(dailyData);
+    const values2 = Object.values(dailyData);
+
+    new Chart(document.getElementById("dailyChart"), {
+        type: "line",
+        data: {
+            labels: labels2,
+            datasets: [{
+                label: "Sales (₹)",
+                data: values2
+            }]
+        }
+    });
+</script>
+
+</body>
+</html>
